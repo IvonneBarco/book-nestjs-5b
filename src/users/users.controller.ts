@@ -11,6 +11,7 @@ import {
   Put,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { CreateUserDto, UpdateUserDto } from './user.dto';
 
 interface User {
   id: string;
@@ -106,24 +107,19 @@ export class UsersController {
   }
 
   @Post()
-  createUser(@Body() user: User) {
-    console.log('.:: user: ', user);
-    // Valide que el correo no este vacio
-    if (user.email.trim() === '') {
-      throw new BadRequestException(`El correo no puede estar vacio`);
-    }
+  createUser(@Body() userPayload: CreateUserDto) {
+    console.log('.:: user: ', userPayload);
 
-    //Valide que el correo tenga el formato correcto
-    if (user.email.includes('@') === false) {
-      throw new UnprocessableEntityException(
-        `El correo ${user.email} no tiene el formato correcto`,
-      );
-    }
+    const newUser = {
+      ...userPayload,
+      id: `${new Date().getTime()}`,
+      nickname: userPayload.name.substring(0, 3) + '123'
+    };
+    this.users.push(newUser);
 
-    this.users.push(user);
     return {
-      msg: 'Usuario creado correctamente',
-      data: user,
+      message: 'Usuario creado correctamente',
+      data: userPayload,
     };
   }
 
@@ -140,10 +136,7 @@ export class UsersController {
   }
 
   @Put(':id')
-  updateUser(@Param('id') id: string, @Body() changes: User) {
-    console.log('.:: ID usuario: ', id);
-    console.log('.:: Cambios: ', changes);
-
+  updateUser(@Param('id') id: string, @Body() changes: UpdateUserDto) {
     const position = this.users.findIndex((user) => user.id === id);
     if (position === -1) {
       throw new NotFoundException(`Usuario con ID ${id} no existe`);
@@ -153,7 +146,6 @@ export class UsersController {
       ...currentData,
       ...changes,
     };
-
     this.users[position] = updateUser;
 
     return {
