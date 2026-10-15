@@ -5,11 +5,10 @@ import {
 } from '@nestjs/common';
 import { User } from './user.model';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
-import { AppService } from '../app.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private appService: AppService) {}
+  constructor() {}
 
   private users: User[] = [
     {
@@ -109,7 +108,7 @@ export class UsersService {
     const newUser = {
       ...userPayload,
       id: `${new Date().getTime()}`,
-      nickname: this.appService.nicknameGenerator(userPayload.name),
+      nickname: this.nicknameGenerator(userPayload.name),
       isActive: true,
     };
     this.users.push(newUser);
@@ -147,5 +146,9 @@ export class UsersService {
       msg: 'Usuario actualizado',
       data: updateUser,
     };
+  }
+
+  nicknameGenerator(name: string): string {
+    return name.substring(0, 3) + '123';
   }
 }
