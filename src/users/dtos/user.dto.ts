@@ -4,9 +4,6 @@ import { Type } from "class-transformer";
 
 export class CreateUserDto {
 
-    @IsString()
-    @IsNotEmpty()
-    name: string;
 
     @IsEmail()
     @IsNotEmpty()
