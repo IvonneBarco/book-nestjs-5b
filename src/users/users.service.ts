@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IUser } from './user.model';
-import { CreateUserDto, UpdateUserDto } from './user.dto';
+import { CreateUserDto, UpdateUserDto } from './dtos/user.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -14,13 +14,17 @@ import { User } from './entities/user.entity';
 export class UsersService {
   
   constructor(
-    @InjectRepository(User) private userRepository: Repository<IUser>,
+    @InjectRepository(User) 
+    private userRepository: Repository<IUser>,
   ) {}
 
   async findAll() {
     // logica de negocio
     const users = await this.userRepository.find();
-    return users;
+    return {
+      data: users,
+      count: users.length,
+    };
   }
 
   async findById(id: number) {
@@ -58,7 +62,11 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${id} no existe`);
     }
-    this.userRepository.delete(user.id);
+    const result = await this.userRepository.delete(user.id);
+    return {
+      message: 'Usuario eliminado correctamente',
+      data: result,
+    };
   }
 
   async update(id: number, changes: UpdateUserDto) {

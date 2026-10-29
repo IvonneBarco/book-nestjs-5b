@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Profile } from "./profile.entity";
 
 @Entity({
     name: "users",
@@ -22,11 +23,15 @@ export class User {
         })
     createdAt: Date;
 
-    @CreateDateColumn(
+    @UpdateDateColumn(
         { 
             type: "timestamptz",
             default: () => "CURRENT_TIMESTAMP",
             name: "updated_at" 
         })
     updatedAt: Date;
+
+    @OneToOne(() => Profile, { nullable: false, cascade: true })
+    @JoinColumn({ name: "profile_id" })
+    profile: Profile
 }
