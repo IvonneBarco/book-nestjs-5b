@@ -15,9 +15,13 @@ export class PostService {
     @InjectRepository(Post) private postRepository: Repository<Post>,
   ) {}
 
-  create(createPostDto: CreatePostDto) {
+  async create(body: CreatePostDto) {
     try {
-      const newPost = this.postRepository.save(createPostDto);
+      const newPost = await this.postRepository.save({
+        ...body,
+        user: { id: body.userId },
+      });
+      
       return {
         message: 'Post creado exitosamente',
         data: newPost,
@@ -28,7 +32,9 @@ export class PostService {
   }
 
   async findAll() {
-    const post = await this.postRepository.find();
+    const post = await this.postRepository.find({
+      relations: { user: { profile: true } },
+    });
     return {
       data: post,
       count: post.length,
@@ -46,6 +52,7 @@ export class PostService {
   async findOne(id: number) {
     const post = await this.postRepository.findOne({
       where: { id },
+      relations: { user: true },
     });
     if (!post) {
       throw new BadRequestException('Post no encontrado');

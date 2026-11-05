@@ -48,7 +48,7 @@ export class UsersService {
   //   return { result: data.email };
   // }
 
-  create(userPayload: CreateUserDto) {
+  async create(userPayload: CreateUserDto) {
     try {
       const newUser = this.userRepository.save(userPayload);
       return newUser;
@@ -96,5 +96,17 @@ export class UsersService {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
     return user;
+  }
+
+  async getPostByUserId(userId: number) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: { posts: true },
+    });
+
+    if(!user) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+    }
+    return user.posts;
   }
 }
