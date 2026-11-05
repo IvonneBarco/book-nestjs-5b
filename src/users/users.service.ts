@@ -12,10 +12,9 @@ import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  
   constructor(
-    @InjectRepository(User) 
-    private userRepository: Repository<IUser>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async findAll() {
@@ -70,22 +69,31 @@ export class UsersService {
   }
 
   async update(id: number, changes: UpdateUserDto) {
-    const user = await this.findOne(id);
-    if (!user) {
-      throw new NotFoundException(`Usuario con ID ${id} no existe`);
+    try {
+      const user = await this.findOne(id);
+      if (!user) {
+        throw new NotFoundException(`Usuario con ID ${id} no existe`);
+      }
+      const updatedUser = this.userRepository.merge(user, changes);
+      const savedUser = await this.userRepository.save(updatedUser);
+      return savedUser;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('Error al actualizar el usuario');
     }
-    const updatedUser = this.userRepository.merge(user, changes);
-    return this.userRepository.save(updatedUser);
   }
 
   nicknameGenerator(name: string): string {
     return name.substring(0, 3) + '123';
   }
 
-  private async findOne(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
+  async findOne(id: number) {
+    const user = await this.userRepository.findOne({
+      where: {id},
+      relations: {profile: true}
+    })
     if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
     return user;
   }
